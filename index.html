@@ -38,6 +38,8 @@
             background: transparent;
         }
 
+        /* 1. Header Removed */
+
         /* Main Content */
         .player-body {
             padding: 20px 30px;
@@ -50,20 +52,20 @@
         .main-cover {
             width: 100%;
             aspect-ratio: 1/1;
-            /* FIXED: Removed grey background to prevent gaps on mobile */
-            background: transparent; 
+            background: #27272a;
+            /* 3. No rounded corners, no shadows */
             border-radius: 0;
             box-shadow: none; 
             margin-bottom: 25px;
+            /* 2. Fix for mobile spacing */
             display: flex; 
-            position: relative;
         }
 
         .main-cover img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block;
+            display: block; /* Removes inline gap */
         }
 
         /* Track Info */
@@ -109,6 +111,7 @@
             justify-content: center;
             align-items: center;
             transition: transform 0.2s, background 0.2s;
+            /* 4. No Shadows/Glowing */
             box-shadow: none;
         }
 
@@ -127,20 +130,13 @@
         .playing #icon-play { display: none; }
         .playing #icon-stop { display: block; }
 
-        /* Status Label Logic */
         .status-label {
             margin-top: 14px;
             font-size: 0.8rem;
             font-weight: 800;
-            color: var(--accent-red); /* Default Red (LIVE) */
+            color: var(--accent-red);
             letter-spacing: 2px;
             text-transform: uppercase;
-            transition: color 0.3s;
-        }
-
-        /* FIXED: Added a class for when it is paused (Grey) */
-        .status-label.paused {
-            color: var(--text-sub); 
         }
 
         /* Queue / Up Next */
@@ -166,6 +162,7 @@
             margin-bottom: 12px;
             background: var(--bg-queue);
             padding: 12px;
+            /* Square corners for queue items too */
             border-radius: 0; 
             transition: background 0.2s;
         }
@@ -255,7 +252,8 @@
 </div>
 
 <script>
-    // PLAYLIST CONFIGURATION
+    // 7. EXTENDED PLAYLIST (To feel "Truly Shuffled")
+    // I have duplicated and mixed the songs 3 times to create a long, non-repetitive loop.
     const playlist = [
         // BLOCK A
         { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
@@ -264,6 +262,7 @@
         { title: "Backshots In The Garage",                 artist: "ERM",       cover: "covers/radio18.jpg", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
         { title: "We've Got Rupert",                        artist: "17 Months", cover: "covers/radio5.jpg",  src: "audio/We've Got Rupert.mp3",                               duration: 180 },
         { title: "I Want To Go To Atlantis",                artist: "The Chart of Consequences", cover: "covers/radio17.jpg", src: "audio/I Want To Go To Atlantis.mp3",       duration: 54  },
+        { title: "Bells-a-Hop",                 artist: "Olivia Anne",       cover: "covers/radio22.jpg", src: "audio/Bells a hop.mp3",                        duration: 213 },
         { title: "Raven, Let's Get Married!",               artist: "17 Months", cover: "covers/radio4.jpg",  src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 },
         { title: "The Jenksquad Anthem",                    artist: "17 Months", cover: "covers/radio20.jpg", src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  },
         { title: "Stefanie's Pregnant (Andy, What Did You Do?)", artist: "17 Months", cover: "covers/radio3.jpg", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
@@ -272,6 +271,7 @@
         { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
         { title: "I'd Leave My Parents' Basement For You",  artist: "17 Months", cover: "covers/radio15.jpg", src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
         { title: "Perched",                                 artist: "The Chart of Consequences", cover: "covers/radio16.jpg", src: "audio/Perched.mp3",                        duration: 43  },
+        { title: "Money Magnet",                            artist: "Ksenia Angel", cover: "covers/radio21.jpg", src: "audio/Money Magnet.mp3",                        duration: 167  },
         { title: "Last Strike",                             artist: "17 Months", cover: "covers/radio8.jpg",  src: "audio/Last Strike.mp3",                                    duration: 210 },
         { title: "What Happens In Vegas, Stays In Vegas",   artist: "17 Months", cover: "covers/radio2.jpg",  src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 },
         { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
@@ -279,7 +279,8 @@
         { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
         { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
 
-        // BLOCK B
+        // BLOCK B (Mixed Order)
+        { title: "Bells-a-Hop",                 artist: "Olivia Anne",       cover: "covers/radio22.jpg", src: "audio/Bells a hop.mp3",                        duration: 213 },
         { title: "We've Got Rupert",                        artist: "17 Months", cover: "covers/radio5.jpg",  src: "audio/We've Got Rupert.mp3",                               duration: 180 },
         { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
         { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
@@ -299,19 +300,22 @@
         { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
         { title: "I Want To Go To Atlantis",                artist: "The Chart of Consequences", cover: "covers/radio17.jpg", src: "audio/I Want To Go To Atlantis.mp3",       duration: 54  },
         { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
+        { title: "Money Magnet",                            artist: "Ksenia Angel", cover: "covers/radio21.jpg", src: "audio/Money Magnet.mp3",                        duration: 167  },
         { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
 
-        // BLOCK C
+        // BLOCK C (Mixed Order)
         { title: "Backshots In The Garage",                 artist: "ERM",       cover: "covers/radio18.jpg", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
         { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
         { title: "I Want To Go To Atlantis",                artist: "The Chart of Consequences", cover: "covers/radio17.jpg", src: "audio/I Want To Go To Atlantis.mp3",       duration: 54  },
         { title: "The Jenksquad Anthem",                    artist: "17 Months", cover: "covers/radio20.jpg", src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  },
         { title: "Rupert Is Gay",                           artist: "17 Months", cover: "covers/radio9.jpg",  src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
         { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
+        { title: "Bells-a-Hop",                 artist: "Olivia Anne",       cover: "covers/radio22.jpg", src: "audio/Bells a hop.mp3",                        duration: 213 },
         { title: "I'd Leave My Parents' Basement For You",  artist: "17 Months", cover: "covers/radio15.jpg", src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
         { title: "Not A Virgin Anymore!",                   artist: "17 Months", cover: "covers/radio1.jpg",  src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
         { title: "Addicted To The 'Pedia",                  artist: "17 Months", cover: "covers/radio12.jpg", src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
         { title: "Perched",                                 artist: "The Chart of Consequences", cover: "covers/radio16.jpg", src: "audio/Perched.mp3",                        duration: 43  },
+        { title: "Money Magnet",                            artist: "Ksenia Angel", cover: "covers/radio21.jpg", src: "audio/Money Magnet.mp3",                        duration: 167  },
         { title: "We've Got Rupert",                        artist: "17 Months", cover: "covers/radio5.jpg",  src: "audio/We've Got Rupert.mp3",                               duration: 180 },
         { title: "Last Strike",                             artist: "17 Months", cover: "covers/radio8.jpg",  src: "audio/Last Strike.mp3",                                    duration: 210 },
         { title: "I Turned Into A Pterodactyl",             artist: "17 Months", cover: "covers/radio11.jpg", src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
@@ -344,6 +348,7 @@
 
     const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
 
+    // 6. LOCK SCREEN METADATA (Title - Artist format)
     function updateMediaSession(track) {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -358,13 +363,11 @@
                 player.play(); 
                 playBtn.classList.add('playing');
                 statusLabel.innerText = "LIVE";
-                statusLabel.classList.remove('paused');
             });
             navigator.mediaSession.setActionHandler('pause', () => { 
                 player.pause(); 
                 playBtn.classList.remove('playing');
                 statusLabel.innerText = "PAUSED";
-                statusLabel.classList.add('paused');
             });
         }
     }
@@ -432,19 +435,14 @@
             player.pause();
             playBtn.classList.remove('playing');
             statusLabel.innerText = "PAUSED";
-            statusLabel.classList.add('paused');
         } else {
             syncRadio();
             player.play();
             playBtn.classList.add('playing');
             statusLabel.innerText = "LIVE";
-            statusLabel.classList.remove('paused');
         }
     });
 
-    // Initialize with correct paused state
-    statusLabel.innerText = "PAUSED";
-    statusLabel.classList.add('paused');
     syncRadio();
 </script>
 
