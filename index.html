@@ -5,162 +5,250 @@
     <title>Live Radio</title>
     <style>
         body {
-            font-family: monospace;
-            background: #222;
-            color: #fff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #b4cabe; /* Your requested color */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
-        .radio-box {
-            background: #333;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            width: 320px;
-            border: 2px solid #444;
-        }
-        .status {
-            color: #0f0;
-            margin-bottom: 10px;
-            font-size: 0.9em;
-            letter-spacing: 1px;
-        }
-        #track-name {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin: 15px 0;
-            color: #fff;
-            min-height: 1.2em;
-        }
-        #time-display {
-            color: #aaa;
-            font-size: 0.9em;
-            margin-bottom: 15px;
-        }
-        button {
+
+        .radio-card {
             background: #fff;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            margin-top: 5px;
+            width: 380px;
+            height: 140px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Cover Art Area */
+        .cover-art {
+            width: 100px;
+            height: 100px;
+            background-color: #333;
+            border-radius: 12px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Placeholder Icon (Music Note) */
+        .cover-art svg {
+            width: 40px;
+            height: 40px;
+            fill: #666;
+        }
+        
+        /* If you add real images later, they will cover the placeholder */
+        .cover-art img {
             width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none; /* Hidden by default until you add src */
         }
-        button:hover {
-            background: #ddd;
+
+        /* Info Area */
+        .track-info {
+            margin-left: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden; /* prevents text spilling */
         }
+
+        .live-badge {
+            color: #ff3b30;
+            font-weight: 900;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Pulsing Dot */
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ff3b30;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        #track-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #222;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0 0 4px 0;
+            max-width: 200px;
+        }
+
+        #artist-name {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Play Button */
+        .play-btn {
+            background: #222;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            background: #000;
+        }
+
+        .play-btn svg {
+            fill: #fff;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Toggle Icons */
+        #icon-pause { display: none; }
+        .playing #icon-play { display: none; }
+        .playing #icon-pause { display: block; }
+
     </style>
 </head>
 <body>
 
-<div class="radio-box">
-    <div class="status">● LIVE ON AIR</div>
-    <div id="track-name">Connecting...</div>
-    <div id="time-display">--:--</div>
+<div class="radio-card">
+    
+    <div class="cover-art">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        
+        </div>
+
+    <div class="track-info">
+        <div class="live-badge"><div class="live-dot"></div> LIVE</div>
+        <div id="track-title">Connecting...</div>
+        <div id="artist-name">17 Months</div>
+    </div>
+
+    <button class="play-btn" id="play-btn">
+        <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
     
     <audio id="radio-player" preload="auto"></audio>
-    
-    <button id="play-btn">TUNE IN</button>
 </div>
 
 <script>
-    // 1. PLAYLIST CONFIGURATION
-    // All timestamps converted to seconds. Filenames match your screenshot exactly.
+    // PLAYLIST
+    // I added an 'artist' field to all tracks.
+    // If you want to add specific artists later, change "17 Months" to the name.
     const playlist = [
-        { title: "Not A Virgin Anymore!",                   src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
-        { title: "What Happens In Vegas, Stays In Vegas",   src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 },
-        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
-        { title: "Raven, Let's Get Married!",               src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 },
-        { title: "We've Got Rupert",                        src: "audio/We've Got Rupert.mp3",                               duration: 180 },
-        { title: "Jenkins, Is That Cocaine?",               src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 },
-        { title: "Thanksgiving Dinner",                     src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
-        { title: "Last Strike",                             src: "audio/Last Strike.mp3",                                    duration: 210 },
-        { title: "Rupert Is Gay",                           src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
-        { title: "The Death of Jenkins",                    src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
-        { title: "I Turned Into A Pterodactyl",             src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
-        { title: "Addicted To The 'Pedia",                  src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
-        { title: "It's Time To Leave",                      src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
-        { title: "I'm Not An Incel",                        src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
-        { title: "I'd Leave My Parents' Basement For You",  src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
-        { title: "Perched",                                 src: "audio/Perched.mp3",                                        duration: 43  },
-        { title: "I Want To Go To Atlantis",                src: "audio/I Want To Go To Atlantis.mp3",                       duration: 54  },
-        { title: "Backshots In The Garage",                 src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
-        { title: "Blaze and Glory",                         src: "audio/Blaze and Glory.mp3",                                duration: 166 }, // 2:46
-        { title: "The Jenksquad Anthem",                    src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  }  // 1:05
+        { title: "Not A Virgin Anymore!",                   artist: "17 Months", src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
+        { title: "What Happens In Vegas, Stays In Vegas",   artist: "17 Months", src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 },
+        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", artist: "17 Months", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
+        { title: "Raven, Let's Get Married!",               artist: "17 Months", src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 },
+        { title: "We've Got Rupert",                        artist: "17 Months", src: "audio/We've Got Rupert.mp3",                               duration: 180 },
+        { title: "Jenkins, Is That Cocaine?",               artist: "17 Months", src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 },
+        { title: "Thanksgiving Dinner",                     artist: "17 Months", src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
+        { title: "Last Strike",                             artist: "17 Months", src: "audio/Last Strike.mp3",                                    duration: 210 },
+        { title: "Rupert Is Gay",                           artist: "17 Months", src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
+        { title: "The Death of Jenkins",                    artist: "17 Months", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
+        { title: "I Turned Into A Pterodactyl",             artist: "17 Months", src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
+        { title: "Addicted To The 'Pedia",                  artist: "17 Months", src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
+        { title: "It's Time To Leave",                      artist: "17 Months", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
+        { title: "I'm Not An Incel",                        artist: "17 Months", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
+        { title: "I'd Leave My Parents' Basement For You",  artist: "17 Months", src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
+        { title: "Perched",                                 artist: "17 Months", src: "audio/Perched.mp3",                                        duration: 43  },
+        { title: "I Want To Go To Atlantis",                artist: "17 Months", src: "audio/I Want To Go To Atlantis.mp3",                       duration: 54  },
+        { title: "Backshots In The Garage",                 artist: "17 Months", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
+        { title: "Blaze and Glory",                         artist: "17 Months", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
+        { title: "The Jenksquad Anthem",                    artist: "17 Months", src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  }
     ];
 
     const player = document.getElementById('radio-player');
-    const trackName = document.getElementById('track-name');
-    const timeDisplay = document.getElementById('time-display');
+    const trackTitle = document.getElementById('track-title');
+    const artistName = document.getElementById('artist-name');
     const playBtn = document.getElementById('play-btn');
 
-    // Calculate total playlist duration once on load
     const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
 
     function syncRadio() {
-        const now = Math.floor(Date.now() / 1000); // Current global timestamp in seconds
-        let currentPosition = now % totalDuration; // Where we are in the loop
+        const now = Math.floor(Date.now() / 1000); 
+        let currentPosition = now % totalDuration;
         let timeAccumulator = 0;
         
         for (let track of playlist) {
-            // If the current position falls within this track's time window
             if (currentPosition < timeAccumulator + track.duration) {
                 const seekTime = currentPosition - timeAccumulator;
                 
-                // Safe check for current source (prevents null crash)
                 const rawSrc = player.getAttribute('src');
                 const currentSrc = rawSrc ? decodeURIComponent(rawSrc.split('/').pop()) : "";
                 const newSrc = decodeURIComponent(track.src.split('/').pop());
 
-                // Switch track if needed
                 if (currentSrc !== newSrc) {
                     player.src = track.src;
-                    trackName.innerText = track.title;
+                    trackTitle.innerText = track.title;
+                    artistName.innerText = track.artist; // Update Artist
                     player.load();
                     player.currentTime = seekTime;
                     
-                    // Only play if user has clicked "TUNE IN"
-                    if(playBtn.innerText === "STOP") {
+                    // Only play if button is in "Playing" state
+                    if(playBtn.classList.contains('playing')) {
                         player.play().catch(e => console.log("Playback prevented:", e));
                     }
                 } else {
-                    // Drift correction: if off by more than 2 seconds, snap back
                     if (Math.abs(player.currentTime - seekTime) > 2) {
                         player.currentTime = seekTime;
                     }
                 }
-                
-                // Update the visual timer
-                let minutes = Math.floor(seekTime / 60);
-                let seconds = Math.floor(seekTime % 60);
-                timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
                 return;
             }
             timeAccumulator += track.duration;
         }
     }
 
-    // Check sync every second
     setInterval(syncRadio, 1000);
 
-    // Button Logic
     playBtn.addEventListener('click', () => {
         if (player.paused) {
-            syncRadio(); // Sync immediately before playing
+            syncRadio();
             player.play();
-            playBtn.innerText = "STOP";
+            playBtn.classList.add('playing'); // Switch icon to Pause
         } else {
             player.pause();
-            playBtn.innerText = "TUNE IN";
+            playBtn.classList.remove('playing'); // Switch icon to Play
         }
     });
 
-    // Run once on load to show current song title immediately
     syncRadio();
 </script>
 
