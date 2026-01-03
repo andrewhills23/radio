@@ -33,7 +33,7 @@
             font-size: 1.1em;
             margin: 15px 0;
             color: #fff;
-            min-height: 1.2em; /* Prevents jumping if text is empty */
+            min-height: 1.2em;
         }
         #time-display {
             color: #aaa;
@@ -69,27 +69,29 @@
 </div>
 
 <script>
-    // 1. YOUR PLAYLIST
-    // I calculated the seconds for you based on your timestamps.
+    // 1. PLAYLIST CONFIGURATION
+    // All timestamps converted to seconds. Filenames match your screenshot exactly.
     const playlist = [
-        { title: "Not A Virgin Anymore!",                   src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 }, // 3:06
-        { title: "What Happens In Vegas, Stays In Vegas",   src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 }, // 3:28
-        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 }, // 3:59
-        { title: "Raven, Let's Get Married!",               src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 }, // 3:33
-        { title: "We've Got Rupert",                        src: "audio/We've Got Rupert.mp3",                               duration: 180 }, // 3:00
-        { title: "Jenkins, Is That Cocaine?",               src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 }, // 2:42
-        { title: "Thanksgiving Dinner",                     src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 }, // 3:02
-        { title: "Last Strike",                             src: "audio/Last Strike.mp3",                                    duration: 210 }, // 3:30
-        { title: "Rupert Is Gay",                           src: "audio/Rupert Is Gay.mp3",                                  duration: 239 }, // 3:59
-        { title: "The Death of Jenkins",                    src: "audio/The Death of Jenkins.mp3",                           duration: 234 }, // 3:54
-        { title: "I Turned Into A Pterodactyl",             src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 }, // 2:45
-        { title: "Addicted To The 'Pedia",                  src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 }, // 3:18
-        { title: "It's Time To Leave",                      src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 }, // 3:58
-        { title: "I'm Not An Incel",                        src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 }, // 2:49
-        { title: "I'd Leave My Parents' Basement For You",  src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 }, // 3:41
-        { title: "Perched",                                 src: "audio/Perched.mp3",                                        duration: 43  }, // 0:43
-        { title: "I Want To Go To Atlantis",                src: "audio/I Want To Go To Atlantis.mp3",                       duration: 54  }, // 0:54
-        { title: "Backshots In The Garage",                 src: "audio/Backshots In The Garage.mp3",                  duration: 209 }  // 3:29
+        { title: "Not A Virgin Anymore!",                   src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
+        { title: "What Happens In Vegas, Stays In Vegas",   src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 },
+        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
+        { title: "Raven, Let's Get Married!",               src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 },
+        { title: "We've Got Rupert",                        src: "audio/We've Got Rupert.mp3",                               duration: 180 },
+        { title: "Jenkins, Is That Cocaine?",               src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 },
+        { title: "Thanksgiving Dinner",                     src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
+        { title: "Last Strike",                             src: "audio/Last Strike.mp3",                                    duration: 210 },
+        { title: "Rupert Is Gay",                           src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
+        { title: "The Death of Jenkins",                    src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
+        { title: "I Turned Into A Pterodactyl",             src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
+        { title: "Addicted To The 'Pedia",                  src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
+        { title: "It's Time To Leave",                      src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
+        { title: "I'm Not An Incel",                        src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
+        { title: "I'd Leave My Parents' Basement For You",  src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
+        { title: "Perched",                                 src: "audio/Perched.mp3",                                        duration: 43  },
+        { title: "I Want To Go To Atlantis",                src: "audio/I Want To Go To Atlantis.mp3",                       duration: 54  },
+        { title: "Backshots In The Garage",                 src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
+        { title: "Blaze and Glory",                         src: "audio/Blaze and Glory.mp3",                                duration: 166 }, // 2:46
+        { title: "The Jenksquad Anthem",                    src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  }  // 1:05
     ];
 
     const player = document.getElementById('radio-player');
@@ -101,28 +103,28 @@
     const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
 
     function syncRadio() {
-        const now = Math.floor(Date.now() / 1000); // Current global timestamp
+        const now = Math.floor(Date.now() / 1000); // Current global timestamp in seconds
         let currentPosition = now % totalDuration; // Where we are in the loop
-        
         let timeAccumulator = 0;
         
         for (let track of playlist) {
             // If the current position falls within this track's time window
             if (currentPosition < timeAccumulator + track.duration) {
-                
                 const seekTime = currentPosition - timeAccumulator;
                 
-                // If the source is different, we switched tracks
-                // decodingURI is needed to handle spaces/symbols in filenames securely
-                const currentSrc = decodeURIComponent(player.getAttribute('src').split('/').pop()); 
+                // Safe check for current source (prevents null crash)
+                const rawSrc = player.getAttribute('src');
+                const currentSrc = rawSrc ? decodeURIComponent(rawSrc.split('/').pop()) : "";
                 const newSrc = decodeURIComponent(track.src.split('/').pop());
 
+                // Switch track if needed
                 if (currentSrc !== newSrc) {
                     player.src = track.src;
                     trackName.innerText = track.title;
                     player.load();
                     player.currentTime = seekTime;
-                    // Only auto-play if the user has already clicked "Tune In"
+                    
+                    // Only play if user has clicked "TUNE IN"
                     if(playBtn.innerText === "STOP") {
                         player.play().catch(e => console.log("Playback prevented:", e));
                     }
@@ -137,7 +139,7 @@
                 let minutes = Math.floor(seekTime / 60);
                 let seconds = Math.floor(seekTime % 60);
                 timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                return; // Exit loop once we found the track
+                return;
             }
             timeAccumulator += track.duration;
         }
@@ -149,7 +151,7 @@
     // Button Logic
     playBtn.addEventListener('click', () => {
         if (player.paused) {
-            syncRadio(); // Sync immediately
+            syncRadio(); // Sync immediately before playing
             player.play();
             playBtn.innerText = "STOP";
         } else {
@@ -158,7 +160,7 @@
         }
     });
 
-    // Run once on load to show current song title immediately (even before playing)
+    // Run once on load to show current song title immediately
     syncRadio();
 </script>
 
