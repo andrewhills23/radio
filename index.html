@@ -38,8 +38,6 @@
             background: transparent;
         }
 
-        /* 1. Header Removed */
-
         /* Main Content */
         .player-body {
             padding: 20px 30px;
@@ -52,20 +50,20 @@
         .main-cover {
             width: 100%;
             aspect-ratio: 1/1;
-            background: #27272a;
-            /* 3. No rounded corners, no shadows */
+            /* FIXED: Removed grey background to prevent gaps on mobile */
+            background: transparent; 
             border-radius: 0;
             box-shadow: none; 
             margin-bottom: 25px;
-            /* 2. Fix for mobile spacing */
             display: flex; 
+            position: relative;
         }
 
         .main-cover img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block; /* Removes inline gap */
+            display: block;
         }
 
         /* Track Info */
@@ -111,7 +109,6 @@
             justify-content: center;
             align-items: center;
             transition: transform 0.2s, background 0.2s;
-            /* 4. No Shadows/Glowing */
             box-shadow: none;
         }
 
@@ -130,13 +127,20 @@
         .playing #icon-play { display: none; }
         .playing #icon-stop { display: block; }
 
+        /* Status Label Logic */
         .status-label {
             margin-top: 14px;
             font-size: 0.8rem;
             font-weight: 800;
-            color: var(--accent-red);
+            color: var(--accent-red); /* Default Red (LIVE) */
             letter-spacing: 2px;
             text-transform: uppercase;
+            transition: color 0.3s;
+        }
+
+        /* FIXED: Added a class for when it is paused (Grey) */
+        .status-label.paused {
+            color: var(--text-sub); 
         }
 
         /* Queue / Up Next */
@@ -162,7 +166,6 @@
             margin-bottom: 12px;
             background: var(--bg-queue);
             padding: 12px;
-            /* Square corners for queue items too */
             border-radius: 0; 
             transition: background 0.2s;
         }
@@ -252,8 +255,7 @@
 </div>
 
 <script>
-    // 7. EXTENDED PLAYLIST (To feel "Truly Shuffled")
-    // I have duplicated and mixed the songs 3 times to create a long, non-repetitive loop.
+    // PLAYLIST CONFIGURATION
     const playlist = [
         // BLOCK A
         { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
@@ -277,7 +279,7 @@
         { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
         { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
 
-        // BLOCK B (Mixed Order)
+        // BLOCK B
         { title: "We've Got Rupert",                        artist: "17 Months", cover: "covers/radio5.jpg",  src: "audio/We've Got Rupert.mp3",                               duration: 180 },
         { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
         { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
@@ -299,7 +301,7 @@
         { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
         { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
 
-        // BLOCK C (Mixed Order)
+        // BLOCK C
         { title: "Backshots In The Garage",                 artist: "ERM",       cover: "covers/radio18.jpg", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
         { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
         { title: "I Want To Go To Atlantis",                artist: "The Chart of Consequences", cover: "covers/radio17.jpg", src: "audio/I Want To Go To Atlantis.mp3",       duration: 54  },
@@ -342,7 +344,6 @@
 
     const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
 
-    // 6. LOCK SCREEN METADATA (Title - Artist format)
     function updateMediaSession(track) {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -357,11 +358,13 @@
                 player.play(); 
                 playBtn.classList.add('playing');
                 statusLabel.innerText = "LIVE";
+                statusLabel.classList.remove('paused');
             });
             navigator.mediaSession.setActionHandler('pause', () => { 
                 player.pause(); 
                 playBtn.classList.remove('playing');
                 statusLabel.innerText = "PAUSED";
+                statusLabel.classList.add('paused');
             });
         }
     }
@@ -429,14 +432,19 @@
             player.pause();
             playBtn.classList.remove('playing');
             statusLabel.innerText = "PAUSED";
+            statusLabel.classList.add('paused');
         } else {
             syncRadio();
             player.play();
             playBtn.classList.add('playing');
             statusLabel.innerText = "LIVE";
+            statusLabel.classList.remove('paused');
         }
     });
 
+    // Initialize with correct paused state
+    statusLabel.innerText = "PAUSED";
+    statusLabel.classList.add('paused');
     syncRadio();
 </script>
 
