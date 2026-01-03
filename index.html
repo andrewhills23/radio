@@ -6,7 +6,7 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #b4cabe; /* Your requested color */
+            background-color: #b4cabe;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -31,7 +31,7 @@
         .cover-art {
             width: 100px;
             height: 100px;
-            background-color: #333;
+            background-color: #f0f0f0;
             border-radius: 12px;
             flex-shrink: 0;
             display: flex;
@@ -45,15 +45,21 @@
         .cover-art svg {
             width: 40px;
             height: 40px;
-            fill: #666;
+            fill: #ccc;
+            position: absolute;
+            z-index: 1;
         }
         
-        /* If you add real images later, they will cover the placeholder */
+        /* The Real Image */
         .cover-art img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: none; /* Hidden by default until you add src */
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2; /* sits on top of the icon */
+            display: none; /* Hidden by default until JS activates it */
         }
 
         /* Info Area */
@@ -63,7 +69,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            overflow: hidden; /* prevents text spilling */
+            overflow: hidden;
         }
 
         .live-badge {
@@ -78,7 +84,6 @@
             gap: 6px;
         }
 
-        /* Pulsing Dot */
         .live-dot {
             width: 8px;
             height: 8px;
@@ -137,7 +142,6 @@
             height: 18px;
         }
 
-        /* Toggle Icons */
         #icon-pause { display: none; }
         .playing #icon-play { display: none; }
         .playing #icon-pause { display: block; }
@@ -149,9 +153,9 @@
 <div class="radio-card">
     
     <div class="cover-art">
-        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-        
-        </div>
+        <svg id="placeholder-icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        <img id="cover-img" src="" alt="Album Art">
+    </div>
 
     <div class="track-info">
         <div class="live-badge"><div class="live-dot"></div> LIVE</div>
@@ -168,36 +172,38 @@
 </div>
 
 <script>
-    // PLAYLIST
-    // I added an 'artist' field to all tracks.
-    // If you want to add specific artists later, change "17 Months" to the name.
+    // 1. PLAYLIST CONFIGURATION
+    // IMPORTANT: Edit the 'cover' fields below with your actual image filenames.
+    // Example: cover: "covers/my_cool_pic.jpg"
+    
     const playlist = [
-        { title: "Not A Virgin Anymore!",                   artist: "17 Months", src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
-        { title: "What Happens In Vegas, Stays In Vegas",   artist: "17 Months", src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 },
-        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", artist: "17 Months", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
-        { title: "Raven, Let's Get Married!",               artist: "17 Months", src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 },
-        { title: "We've Got Rupert",                        artist: "17 Months", src: "audio/We've Got Rupert.mp3",                               duration: 180 },
-        { title: "Jenkins, Is That Cocaine?",               artist: "17 Months", src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 },
-        { title: "Thanksgiving Dinner",                     artist: "17 Months", src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
-        { title: "Last Strike",                             artist: "17 Months", src: "audio/Last Strike.mp3",                                    duration: 210 },
-        { title: "Rupert Is Gay",                           artist: "17 Months", src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
-        { title: "The Death of Jenkins",                    artist: "17 Months", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
-        { title: "I Turned Into A Pterodactyl",             artist: "17 Months", src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
-        { title: "Addicted To The 'Pedia",                  artist: "17 Months", src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
-        { title: "It's Time To Leave",                      artist: "17 Months", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
-        { title: "I'm Not An Incel",                        artist: "17 Months", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
-        { title: "I'd Leave My Parents' Basement For You",  artist: "17 Months", src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
-        { title: "Perched",                                 artist: "17 Months", src: "audio/Perched.mp3",                                        duration: 43  },
-        { title: "I Want To Go To Atlantis",                artist: "17 Months", src: "audio/I Want To Go To Atlantis.mp3",                       duration: 54  },
-        { title: "Backshots In The Garage",                 artist: "17 Months", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
-        { title: "Blaze and Glory",                         artist: "17 Months", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
-        { title: "The Jenksquad Anthem",                    artist: "17 Months", src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  }
+        { title: "Not A Virgin Anymore!",                   artist: "17 Months", cover: "covers/radio1.jpg", src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
+        { title: "What Happens In Vegas, Stays In Vegas",   artist: "17 Months", cover: "covers/radio2.jpg", src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 },
+        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", artist: "17 Months", cover: "covers/radio3.jpg", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
+        { title: "Raven, Let's Get Married!",               artist: "17 Months", cover: "covers/radio4.jpg", src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 },
+        { title: "We've Got Rupert",                        artist: "17 Months", cover: "covers/radio5.jpg", src: "audio/We've Got Rupert.mp3",                               duration: 180 },
+        { title: "Jenkins, Is That Cocaine?",               artist: "17 Months", cover: "covers/radio6.jpg", src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 },
+        { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg", src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
+        { title: "Last Strike",                             artist: "17 Months", cover: "covers/radio8.jpg", src: "audio/Last Strike.mp3",                                    duration: 210 },
+        { title: "Rupert Is Gay",                           artist: "17 Months", cover: "covers/radio9.jpg", src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
+        { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
+        { title: "I Turned Into A Pterodactyl",             artist: "17 Months", cover: "covers/radio11.jpg", src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
+        { title: "Addicted To The 'Pedia",                  artist: "17 Months", cover: "covers/radio12.jpg", src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
+        { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
+        { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
+        { title: "I'd Leave My Parents' Basement For You",  artist: "17 Months", cover: "covers/radio15.jpg", src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
+        { title: "Perched",                                 artist: "The Chart of Consequences", cover: "covers/radio16.jpg", src: "audio/Perched.mp3",                                        duration: 43  },
+        { title: "I Want To Go To Atlantis",                artist: "The Chart of Consequences", cover: "covers/radio17.jpg", src: "audio/I Want To Go To Atlantis.mp3",                       duration: 54  },
+        { title: "Backshots In The Garage",                 artist: "ERM", cover: "covers/radio18.jpg", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
+        { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
+        { title: "The Jenksquad Anthem",                    artist: "17 Months", cover: "covers/radio20.jpg", src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  }
     ];
 
     const player = document.getElementById('radio-player');
     const trackTitle = document.getElementById('track-title');
     const artistName = document.getElementById('artist-name');
     const playBtn = document.getElementById('play-btn');
+    const coverImg = document.getElementById('cover-img');
 
     const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
 
@@ -217,11 +223,19 @@
                 if (currentSrc !== newSrc) {
                     player.src = track.src;
                     trackTitle.innerText = track.title;
-                    artistName.innerText = track.artist; // Update Artist
+                    artistName.innerText = track.artist;
+                    
+                    // HANDLE COVER ART
+                    if (track.cover && track.cover !== "") {
+                        coverImg.src = track.cover;
+                        coverImg.style.display = 'block'; // Show image
+                    } else {
+                        coverImg.style.display = 'none'; // Hide image, show placeholder
+                    }
+
                     player.load();
                     player.currentTime = seekTime;
                     
-                    // Only play if button is in "Playing" state
                     if(playBtn.classList.contains('playing')) {
                         player.play().catch(e => console.log("Playback prevented:", e));
                     }
@@ -242,10 +256,10 @@
         if (player.paused) {
             syncRadio();
             player.play();
-            playBtn.classList.add('playing'); // Switch icon to Pause
+            playBtn.classList.add('playing');
         } else {
             player.pause();
-            playBtn.classList.remove('playing'); // Switch icon to Play
+            playBtn.classList.remove('playing');
         }
     });
 
