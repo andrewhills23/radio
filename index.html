@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My GitHub Radio</title>
+    <title>Live Radio</title>
     <style>
         body {
             font-family: monospace;
@@ -19,19 +19,26 @@
             padding: 20px;
             border-radius: 8px;
             text-align: center;
-            width: 300px;
+            width: 320px;
             border: 2px solid #444;
         }
         .status {
             color: #0f0;
             margin-bottom: 10px;
             font-size: 0.9em;
+            letter-spacing: 1px;
         }
         #track-name {
             font-weight: bold;
-            font-size: 1.2em;
-            margin: 10px 0;
+            font-size: 1.1em;
+            margin: 15px 0;
             color: #fff;
+            min-height: 1.2em; /* Prevents jumping if text is empty */
+        }
+        #time-display {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-bottom: 15px;
         }
         button {
             background: #fff;
@@ -41,30 +48,48 @@
             cursor: pointer;
             font-family: inherit;
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 5px;
+            width: 100%;
         }
         button:hover {
-            background: #ccc;
+            background: #ddd;
         }
     </style>
 </head>
 <body>
 
 <div class="radio-box">
-    <div class="status">● LIVE BROADCAST</div>
-    <div id="track-name">Loading...</div>
-    <div id="time-display">00:00</div>
+    <div class="status">● LIVE ON AIR</div>
+    <div id="track-name">Connecting...</div>
+    <div id="time-display">--:--</div>
+    
     <audio id="radio-player" preload="auto"></audio>
+    
     <button id="play-btn">TUNE IN</button>
 </div>
 
 <script>
-    // 1. CONFIGURATION
-    // List your tracks here. Duration must be in SECONDS.
+    // 1. YOUR PLAYLIST
+    // I calculated the seconds for you based on your timestamps.
     const playlist = [
-        { title: "Lofi Beats 01", src: "audio/track1.mp3", duration: 180 }, 
-        { title: "Synthwave Mix", src: "audio/track2.mp3", duration: 240 },
-        { title: "Jazz Vibes",    src: "audio/track3.mp3", duration: 210 } 
+        { title: "Not A Virgin Anymore!",                   src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 }, // 3:06
+        { title: "What Happens In Vegas, Stays In Vegas",   src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 }, // 3:28
+        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 }, // 3:59
+        { title: "Raven, Let's Get Married!",               src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 }, // 3:33
+        { title: "We've Got Rupert",                        src: "audio/We've Got Rupert.mp3",                               duration: 180 }, // 3:00
+        { title: "Jenkins, Is That Cocaine?",               src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 }, // 2:42
+        { title: "Thanksgiving Dinner",                     src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 }, // 3:02
+        { title: "Last Strike",                             src: "audio/Last Strike.mp3",                                    duration: 210 }, // 3:30
+        { title: "Rupert Is Gay",                           src: "audio/Rupert Is Gay.mp3",                                  duration: 239 }, // 3:59
+        { title: "The Death of Jenkins",                    src: "audio/The Death of Jenkins.mp3",                           duration: 234 }, // 3:54
+        { title: "I Turned Into A Pterodactyl",             src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 }, // 2:45
+        { title: "Addicted To The 'Pedia",                  src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 }, // 3:18
+        { title: "It's Time To Leave",                      src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 }, // 3:58
+        { title: "I'm Not An Incel",                        src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 }, // 2:49
+        { title: "I'd Leave My Parents' Basement For You",  src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 }, // 3:41
+        { title: "Perched",                                 src: "audio/Perched.mp3",                                        duration: 43  }, // 0:43
+        { title: "I Want To Go To Atlantis",                src: "audio/I Want To Go To Atlantis.mp3",                       duration: 54  }, // 0:54
+        { title: "Backshots In The Garage",                 src: "audio/Backshots In The Garage.mp3",                  duration: 209 }  // 3:29
     ];
 
     const player = document.getElementById('radio-player');
@@ -72,43 +97,47 @@
     const timeDisplay = document.getElementById('time-display');
     const playBtn = document.getElementById('play-btn');
 
-    // Calculate total playlist duration
+    // Calculate total playlist duration once on load
     const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
 
     function syncRadio() {
-        const now = Math.floor(Date.now() / 1000); // Current Unix Timestamp (seconds)
+        const now = Math.floor(Date.now() / 1000); // Current global timestamp
+        let currentPosition = now % totalDuration; // Where we are in the loop
         
-        // Find where we are in the loop
-        let currentPosition = now % totalDuration;
-        
-        // Find which track this position corresponds to
         let timeAccumulator = 0;
+        
         for (let track of playlist) {
+            // If the current position falls within this track's time window
             if (currentPosition < timeAccumulator + track.duration) {
-                // We found the current track
+                
                 const seekTime = currentPosition - timeAccumulator;
                 
-                // Only change source if it's a different track
-                // (This prevents reloading if we just re-sync)
-                const currentSrc = player.getAttribute('src');
-                if (currentSrc !== track.src) {
+                // If the source is different, we switched tracks
+                // decodingURI is needed to handle spaces/symbols in filenames securely
+                const currentSrc = decodeURIComponent(player.getAttribute('src').split('/').pop()); 
+                const newSrc = decodeURIComponent(track.src.split('/').pop());
+
+                if (currentSrc !== newSrc) {
                     player.src = track.src;
                     trackName.innerText = track.title;
                     player.load();
                     player.currentTime = seekTime;
-                    if(playBtn.innerText === "STOP") player.play();
+                    // Only auto-play if the user has already clicked "Tune In"
+                    if(playBtn.innerText === "STOP") {
+                        player.play().catch(e => console.log("Playback prevented:", e));
+                    }
                 } else {
-                    // Just a time check: if we drifted more than 2 seconds, resync
+                    // Drift correction: if off by more than 2 seconds, snap back
                     if (Math.abs(player.currentTime - seekTime) > 2) {
                         player.currentTime = seekTime;
                     }
                 }
                 
-                // Update Visual Timer
+                // Update the visual timer
                 let minutes = Math.floor(seekTime / 60);
                 let seconds = Math.floor(seekTime % 60);
                 timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                break;
+                return; // Exit loop once we found the track
             }
             timeAccumulator += track.duration;
         }
@@ -117,10 +146,10 @@
     // Check sync every second
     setInterval(syncRadio, 1000);
 
-    // Initial Play Button Logic (Browsers block auto-play)
+    // Button Logic
     playBtn.addEventListener('click', () => {
         if (player.paused) {
-            syncRadio(); // Sync before playing
+            syncRadio(); // Sync immediately
             player.play();
             playBtn.innerText = "STOP";
         } else {
@@ -128,6 +157,9 @@
             playBtn.innerText = "TUNE IN";
         }
     });
+
+    // Run once on load to show current song title immediately (even before playing)
+    syncRadio();
 </script>
 
 </body>
