@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My GitHub Radio</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .radio-box {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            width: 300px;
+            border: 2px solid #444;
+        }
+        .status {
+            color: #0f0;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+        #track-name {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #fff;
+        }
+        button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="radio-box">
+    <div class="status">● LIVE BROADCAST</div>
+    <div id="track-name">Loading...</div>
+    <div id="time-display">00:00</div>
+    <audio id="radio-player" preload="auto"></audio>
+    <button id="play-btn">TUNE IN</button>
+</div>
+
+<script>
+    // 1. CONFIGURATION
+    // List your tracks here. Duration must be in SECONDS.
+    const playlist = [
+        { title: "Lofi Beats 01", src: "audio/track1.mp3", duration: 180 }, 
+        { title: "Synthwave Mix", src: "audio/track2.mp3", duration: 240 },
+        { title: "Jazz Vibes",    src: "audio/track3.mp3", duration: 210 } 
+    ];
+
+    const player = document.getElementById('radio-player');
+    const trackName = document.getElementById('track-name');
+    const timeDisplay = document.getElementById('time-display');
+    const playBtn = document.getElementById('play-btn');
+
+    // Calculate total playlist duration
+    const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
+
+    function syncRadio() {
+        const now = Math.floor(Date.now() / 1000); // Current Unix Timestamp (seconds)
+        
+        // Find where we are in the loop
+        let currentPosition = now % totalDuration;
+        
+        // Find which track this position corresponds to
+        let timeAccumulator = 0;
+        for (let track of playlist) {
+            if (currentPosition < timeAccumulator + track.duration) {
+                // We found the current track
+                const seekTime = currentPosition - timeAccumulator;
+                
+                // Only change source if it's a different track
+                // (This prevents reloading if we just re-sync)
+                const currentSrc = player.getAttribute('src');
+                if (currentSrc !== track.src) {
+                    player.src = track.src;
+                    trackName.innerText = track.title;
+                    player.load();
+                    player.currentTime = seekTime;
+                    if(playBtn.innerText === "STOP") player.play();
+                } else {
+                    // Just a time check: if we drifted more than 2 seconds, resync
+                    if (Math.abs(player.currentTime - seekTime) > 2) {
+                        player.currentTime = seekTime;
+                    }
+                }
+                
+                // Update Visual Timer
+                let minutes = Math.floor(seekTime / 60);
+                let seconds = Math.floor(seekTime % 60);
+                timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                break;
+            }
+            timeAccumulator += track.duration;
+        }
+    }
+
+    // Check sync every second
+    setInterval(syncRadio, 1000);
+
+    // Initial Play Button Logic (Browsers block auto-play)
+    playBtn.addEventListener('click', () => {
+        if (player.paused) {
+            syncRadio(); // Sync before playing
+            player.play();
+            playBtn.innerText = "STOP";
+        } else {
+            player.pause();
+            playBtn.innerText = "TUNE IN";
+        }
+    });
+</script>
+
+</body>
+</html>
