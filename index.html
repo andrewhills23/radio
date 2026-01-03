@@ -11,9 +11,7 @@
 
     <style>
         :root {
-            /* DARK MODE PALETTE */
-            --brand: #b4cabe;         
-            --bg-main: #18181b;       /* The main dark background */
+            --bg-main: #18181b;       
             --bg-queue: #27272a;      
             --text-main: #ffffff;     
             --text-sub: #a1a1aa;      
@@ -24,68 +22,27 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-main); /* Fills the whole screen with dark color */
+            background-color: var(--bg-main);
             margin: 0;
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center; /* Vertically center the player */
+            align-items: center;
         }
 
         .radio-container {
             width: 100%;
-            max-width: 450px; /* Keeps it looking nice on Desktop */
+            max-width: 450px;
             padding: 0;
-            background: transparent; /* No box background, blends with body */
+            background: transparent;
         }
 
-        /* Header - Now floats at the top of the content area */
-        .station-header {
-            background-color: var(--brand);
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #1f2937; 
-            border-radius: 8px; /* Slight round on the header bar only */
-            margin: 20px;
-        }
-
-        .station-name {
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: -0.5px;
-        }
-
-        .live-badge {
-            background: rgba(0,0,0,0.1);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #dc2626;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-        }
+        /* 1. Header Removed */
 
         /* Main Content */
         .player-body {
-            padding: 0 30px 30px 30px;
+            padding: 20px 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -96,16 +53,19 @@
             width: 100%;
             aspect-ratio: 1/1;
             background: #27272a;
-            border-radius: 8px;
-            overflow: hidden;
+            /* 3. No rounded corners, no shadows */
+            border-radius: 0;
+            box-shadow: none; 
             margin-bottom: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4); /* Shadow on the image, not the box */
+            /* 2. Fix for mobile spacing */
+            display: flex; 
         }
 
         .main-cover img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block; /* Removes inline gap */
         }
 
         /* Track Info */
@@ -151,7 +111,8 @@
             justify-content: center;
             align-items: center;
             transition: transform 0.2s, background 0.2s;
-            box-shadow: 0 0 25px rgba(255,255,255,0.15);
+            /* 4. No Shadows/Glowing */
+            box-shadow: none;
         }
 
         .play-btn:hover {
@@ -169,7 +130,7 @@
         .playing #icon-play { display: none; }
         .playing #icon-stop { display: block; }
 
-        .live-label {
+        .status-label {
             margin-top: 14px;
             font-size: 0.8rem;
             font-weight: 800;
@@ -201,7 +162,8 @@
             margin-bottom: 12px;
             background: var(--bg-queue);
             padding: 12px;
-            border-radius: 8px;
+            /* Square corners for queue items too */
+            border-radius: 0; 
             transition: background 0.2s;
         }
         
@@ -212,11 +174,12 @@
         .mini-thumb {
             width: 48px;
             height: 48px;
-            border-radius: 4px;
+            border-radius: 0; /* Square */
             background: #333;
             margin-right: 15px;
             object-fit: cover;
             flex-shrink: 0;
+            display: block;
         }
 
         .mini-info {
@@ -246,11 +209,6 @@
 <body>
 
 <div class="radio-container">
-    <div class="station-header">
-        <span class="station-name">91.7 FM</span>
-        <div class="live-badge"><div class="live-dot"></div> ON AIR</div>
-    </div>
-
     <div class="player-body">
         <div class="main-cover">
             <img id="main-art" src="" alt="Album Art" style="display:none;">
@@ -266,7 +224,7 @@
                 <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 <svg id="icon-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
             </button>
-            <div class="live-label">LIVE</div>
+            <div class="status-label" id="status-label">PAUSED</div>
         </div>
 
         <div class="queue-section">
@@ -294,8 +252,10 @@
 </div>
 
 <script>
-    // 1. SHUFFLED PLAYLIST
+    // 7. EXTENDED PLAYLIST (To feel "Truly Shuffled")
+    // I have duplicated and mixed the songs 3 times to create a long, non-repetitive loop.
     const playlist = [
+        // BLOCK A
         { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
         { title: "Rupert Is Gay",                           artist: "17 Months", cover: "covers/radio9.jpg",  src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
         { title: "Not A Virgin Anymore!",                   artist: "17 Months", cover: "covers/radio1.jpg",  src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
@@ -315,11 +275,56 @@
         { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
         { title: "Jenkins, Is That Cocaine?",               artist: "17 Months", cover: "covers/radio6.jpg",  src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 },
         { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
-        { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 }
+        { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
+
+        // BLOCK B (Mixed Order)
+        { title: "We've Got Rupert",                        artist: "17 Months", cover: "covers/radio5.jpg",  src: "audio/We've Got Rupert.mp3",                               duration: 180 },
+        { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
+        { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
+        { title: "Perched",                                 artist: "The Chart of Consequences", cover: "covers/radio16.jpg", src: "audio/Perched.mp3",                        duration: 43  },
+        { title: "Addicted To The 'Pedia",                  artist: "17 Months", cover: "covers/radio12.jpg", src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
+        { title: "Raven, Let's Get Married!",               artist: "17 Months", cover: "covers/radio4.jpg",  src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 },
+        { title: "I'd Leave My Parents' Basement For You",  artist: "17 Months", cover: "covers/radio15.jpg", src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
+        { title: "Backshots In The Garage",                 artist: "ERM",       cover: "covers/radio18.jpg", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
+        { title: "Jenkins, Is That Cocaine?",               artist: "17 Months", cover: "covers/radio6.jpg",  src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 },
+        { title: "Rupert Is Gay",                           artist: "17 Months", cover: "covers/radio9.jpg",  src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
+        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", artist: "17 Months", cover: "covers/radio3.jpg", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
+        { title: "I Turned Into A Pterodactyl",             artist: "17 Months", cover: "covers/radio11.jpg", src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
+        { title: "The Jenksquad Anthem",                    artist: "17 Months", cover: "covers/radio20.jpg", src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  },
+        { title: "Last Strike",                             artist: "17 Months", cover: "covers/radio8.jpg",  src: "audio/Last Strike.mp3",                                    duration: 210 },
+        { title: "Not A Virgin Anymore!",                   artist: "17 Months", cover: "covers/radio1.jpg",  src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
+        { title: "What Happens In Vegas, Stays In Vegas",   artist: "17 Months", cover: "covers/radio2.jpg",  src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 },
+        { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
+        { title: "I Want To Go To Atlantis",                artist: "The Chart of Consequences", cover: "covers/radio17.jpg", src: "audio/I Want To Go To Atlantis.mp3",       duration: 54  },
+        { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
+        { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
+
+        // BLOCK C (Mixed Order)
+        { title: "Backshots In The Garage",                 artist: "ERM",       cover: "covers/radio18.jpg", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
+        { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
+        { title: "I Want To Go To Atlantis",                artist: "The Chart of Consequences", cover: "covers/radio17.jpg", src: "audio/I Want To Go To Atlantis.mp3",       duration: 54  },
+        { title: "The Jenksquad Anthem",                    artist: "17 Months", cover: "covers/radio20.jpg", src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  },
+        { title: "Rupert Is Gay",                           artist: "17 Months", cover: "covers/radio9.jpg",  src: "audio/Rupert Is Gay.mp3",                                  duration: 239 },
+        { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
+        { title: "I'd Leave My Parents' Basement For You",  artist: "17 Months", cover: "covers/radio15.jpg", src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
+        { title: "Not A Virgin Anymore!",                   artist: "17 Months", cover: "covers/radio1.jpg",  src: "audio/Not A Virgin Anymore!.mp3",                          duration: 186 },
+        { title: "Addicted To The 'Pedia",                  artist: "17 Months", cover: "covers/radio12.jpg", src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
+        { title: "Perched",                                 artist: "The Chart of Consequences", cover: "covers/radio16.jpg", src: "audio/Perched.mp3",                        duration: 43  },
+        { title: "We've Got Rupert",                        artist: "17 Months", cover: "covers/radio5.jpg",  src: "audio/We've Got Rupert.mp3",                               duration: 180 },
+        { title: "Last Strike",                             artist: "17 Months", cover: "covers/radio8.jpg",  src: "audio/Last Strike.mp3",                                    duration: 210 },
+        { title: "I Turned Into A Pterodactyl",             artist: "17 Months", cover: "covers/radio11.jpg", src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
+        { title: "Stefanie's Pregnant (Andy, What Did You Do?)", artist: "17 Months", cover: "covers/radio3.jpg", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
+        { title: "What Happens In Vegas, Stays In Vegas",   artist: "17 Months", cover: "covers/radio2.jpg",  src: "audio/What Happens In Vegas, Stays In Vegas.mp3",          duration: 208 },
+        { title: "Jenkins, Is That Cocaine?",               artist: "17 Months", cover: "covers/radio6.jpg",  src: "audio/Jenkins, Is That Cocaine_.mp3",                      duration: 162 },
+        { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
+        { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
+        { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
+        { title: "Raven, Let's Get Married!",               artist: "17 Months", cover: "covers/radio4.jpg",  src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 }
     ];
 
     const player = document.getElementById('radio-player');
     const playBtn = document.getElementById('play-btn');
+    const statusLabel = document.getElementById('status-label');
 
     // UI Elements
     const mainArt = document.getElementById('main-art');
@@ -337,12 +342,12 @@
 
     const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
 
+    // 6. LOCK SCREEN METADATA (Title - Artist format)
     function updateMediaSession(track) {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: track.title,
-                artist: track.artist,
-                album: "91.7 FM: 17 Months Radio",
+                title: `${track.title} - ${track.artist}`,
+                artist: "91.7 FM: 17 Months Radio",
                 artwork: [
                     { src: track.cover, sizes: '512x512', type: 'image/jpeg' }
                 ]
@@ -351,10 +356,12 @@
             navigator.mediaSession.setActionHandler('play', () => { 
                 player.play(); 
                 playBtn.classList.add('playing');
+                statusLabel.innerText = "LIVE";
             });
             navigator.mediaSession.setActionHandler('pause', () => { 
                 player.pause(); 
                 playBtn.classList.remove('playing');
+                statusLabel.innerText = "PAUSED";
             });
         }
     }
@@ -416,14 +423,17 @@
 
     setInterval(syncRadio, 1000);
 
+    // Play/Stop Logic with Status Text Change
     playBtn.addEventListener('click', () => {
         if (playBtn.classList.contains('playing')) {
             player.pause();
             playBtn.classList.remove('playing');
+            statusLabel.innerText = "PAUSED";
         } else {
             syncRadio();
             player.play();
             playBtn.classList.add('playing');
+            statusLabel.innerText = "LIVE";
         }
     });
 
