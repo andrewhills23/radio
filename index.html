@@ -38,8 +38,6 @@
             background: transparent;
         }
 
-        /* 1. Header Removed */
-
         /* Main Content */
         .player-body {
             padding: 20px 30px;
@@ -52,20 +50,19 @@
         .main-cover {
             width: 100%;
             aspect-ratio: 1/1;
-            background: #27272a;
-            /* 3. No rounded corners, no shadows */
+            background: transparent; 
             border-radius: 0;
             box-shadow: none; 
             margin-bottom: 25px;
-            /* 2. Fix for mobile spacing */
             display: flex; 
+            position: relative;
         }
 
         .main-cover img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block; /* Removes inline gap */
+            display: block;
         }
 
         /* Track Info */
@@ -111,7 +108,6 @@
             justify-content: center;
             align-items: center;
             transition: transform 0.2s, background 0.2s;
-            /* 4. No Shadows/Glowing */
             box-shadow: none;
         }
 
@@ -130,13 +126,20 @@
         .playing #icon-play { display: none; }
         .playing #icon-stop { display: block; }
 
+        /* Status Label Logic */
         .status-label {
             margin-top: 14px;
             font-size: 0.8rem;
             font-weight: 800;
-            color: var(--accent-red);
+            color: var(--accent-red); /* Default Red (LIVE) */
             letter-spacing: 2px;
             text-transform: uppercase;
+            transition: color 0.3s;
+        }
+
+        /* Paused State */
+        .status-label.paused {
+            color: var(--text-sub); 
         }
 
         /* Queue / Up Next */
@@ -162,7 +165,6 @@
             margin-bottom: 12px;
             background: var(--bg-queue);
             padding: 12px;
-            /* Square corners for queue items too */
             border-radius: 0; 
             transition: background 0.2s;
         }
@@ -252,8 +254,10 @@
 </div>
 
 <script>
-    // 7. EXTENDED PLAYLIST (To feel "Truly Shuffled")
-    // I have duplicated and mixed the songs 3 times to create a long, non-repetitive loop.
+    // 0. GLOBAL TIME SYNC VARIABLES
+    let serverTimeOffset = 0; // The difference between local time and server time
+
+    // 1. EXTENDED PLAYLIST
     const playlist = [
         // BLOCK A
         { title: "20% OFF LIMITED EDITION SHIT BOWLS at SHIT PUDDLE GARY'S SHIT FARM",                 artist: "Shit Puddle Gary's Shit Far",       cover: "covers/radio23.jpg", src: "audio/garyfarm.mp3",                        duration: 36 },
@@ -351,7 +355,27 @@
 
     const totalDuration = playlist.reduce((acc, track) => acc + track.duration, 0);
 
-    // 6. LOCK SCREEN METADATA (Title - Artist format)
+    // 2. SERVER TIME SYNC FUNCTION
+    async function syncToGlobalTime() {
+        try {
+            // We request the current page headers from GitHub
+            // The 'Date' header contains the accurate server time
+            const response = await fetch(window.location.href, { method: 'HEAD' });
+            const serverDateStr = response.headers.get('Date');
+            
+            if (serverDateStr) {
+                const serverTime = new Date(serverDateStr).getTime();
+                const localTime = Date.now();
+                // Calculate difference: Server Time - Local Time
+                // If local time is "behind" (e.g. set to 1999), this offset will be huge positive number
+                serverTimeOffset = (serverTime - localTime) / 1000; 
+                console.log("Synced to server time. Offset (sec):", serverTimeOffset);
+            }
+        } catch (err) {
+            console.log("Could not sync to server time. Using local time.", err);
+        }
+    }
+
     function updateMediaSession(track) {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -366,17 +390,22 @@
                 player.play(); 
                 playBtn.classList.add('playing');
                 statusLabel.innerText = "LIVE";
+                statusLabel.classList.remove('paused');
             });
             navigator.mediaSession.setActionHandler('pause', () => { 
                 player.pause(); 
                 playBtn.classList.remove('playing');
                 statusLabel.innerText = "PAUSED";
+                statusLabel.classList.add('paused');
             });
         }
     }
 
     function syncRadio() {
-        const now = Math.floor(Date.now() / 1000); 
+        // 3. APPLY OFFSET TO TIME CALCULATION
+        // We add the offset to Date.now() to get the "Real" world time
+        const now = Math.floor((Date.now() / 1000) + serverTimeOffset); 
+        
         let currentPosition = now % totalDuration;
         let timeAccumulator = 0;
         
@@ -430,23 +459,33 @@
         }
     }
 
-    setInterval(syncRadio, 1000);
+    // 4. INITIALIZE SYNC
+    // First, try to get the real time
+    syncToGlobalTime().then(() => {
+        // Then start the radio logic
+        setInterval(syncRadio, 1000);
+        
+        // Initialize UI
+        statusLabel.innerText = "PAUSED";
+        statusLabel.classList.add('paused');
+        syncRadio();
+    });
 
-    // Play/Stop Logic with Status Text Change
     playBtn.addEventListener('click', () => {
         if (playBtn.classList.contains('playing')) {
             player.pause();
             playBtn.classList.remove('playing');
             statusLabel.innerText = "PAUSED";
+            statusLabel.classList.add('paused');
         } else {
             syncRadio();
             player.play();
             playBtn.classList.add('playing');
             statusLabel.innerText = "LIVE";
+            statusLabel.classList.remove('paused');
         }
     });
 
-    syncRadio();
 </script>
 
 </body>
