@@ -38,7 +38,6 @@
             background: transparent;
         }
 
-        /* Main Content */
         .player-body {
             padding: 20px 30px;
             display: flex;
@@ -46,7 +45,6 @@
             align-items: center;
         }
 
-        /* Main Art */
         .main-cover {
             width: 100%;
             aspect-ratio: 1/1;
@@ -65,7 +63,6 @@
             display: block;
         }
 
-        /* Track Info */
         .track-info {
             text-align: center;
             width: 100%;
@@ -88,7 +85,6 @@
             font-weight: 500;
         }
 
-        /* Controls */
         .controls-wrapper {
             display: flex;
             flex-direction: column;
@@ -126,23 +122,20 @@
         .playing #icon-play { display: none; }
         .playing #icon-stop { display: block; }
 
-        /* Status Label Logic */
         .status-label {
             margin-top: 14px;
             font-size: 0.8rem;
             font-weight: 800;
-            color: var(--accent-red); /* Default Red (LIVE) */
+            color: var(--accent-red);
             letter-spacing: 2px;
             text-transform: uppercase;
             transition: color 0.3s;
         }
 
-        /* Paused State */
         .status-label.paused {
             color: var(--text-sub); 
         }
 
-        /* Queue / Up Next */
         .queue-section {
             border-top: 1px solid #333;
             padding-top: 25px;
@@ -176,7 +169,7 @@
         .mini-thumb {
             width: 48px;
             height: 48px;
-            border-radius: 0; /* Square */
+            border-radius: 0;
             background: #333;
             margin-right: 15px;
             object-fit: cover;
@@ -205,7 +198,6 @@
             color: var(--text-sub); 
             font-size: 0.8rem; 
         }
-
     </style>
 </head>
 <body>
@@ -255,7 +247,7 @@
 
 <script>
     // 0. GLOBAL TIME SYNC VARIABLES
-    let serverTimeOffset = 0; // The difference between local time and server time
+    let serverTimeOffset = 0; 
 
     // 1. EXTENDED PLAYLIST
     const playlist = [
@@ -273,7 +265,7 @@
         { title: "The Jenksquad Anthem",                    artist: "17 Months", cover: "covers/radio20.jpg", src: "audio/The Jenksquad Anthem.mp3",                           duration: 65  },
         { title: "Stefanie's Pregnant (Andy, What Did You Do?)", artist: "17 Months", cover: "covers/radio3.jpg", src: "audio/Stefanie's Pregnant (Andy, What Did You Do_).mp3", duration: 239 },
         { title: "I Turned Into A Pterodactyl",             artist: "17 Months", cover: "covers/radio11.jpg", src: "audio/Pterodactyl Smoothie.mp3",                           duration: 165 },
-        { title: "Me and Michael",               artist: "MGMT", cover: "covers/radio25.jpg",  src: "audio/michael.mp3",                      duration: 290 }
+        { title: "Me and Michael",               artist: "MGMT", cover: "covers/radio25.jpg",  src: "audio/michael.mp3",                      duration: 290 },
         { title: "Addicted To The 'Pedia",                  artist: "17 Months", cover: "covers/radio12.jpg", src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
         { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
         { title: "I'd Leave My Parents' Basement For You",  artist: "17 Months", cover: "covers/radio15.jpg", src: "audio/17 Months - I'd Leave My Parents' Basement For You 2.mp3", duration: 221 },
@@ -286,13 +278,13 @@
         { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
         { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
 
-        // BLOCK B (Mixed Order)
+        // BLOCK B
         { title: "JOIN US TODAY AT THE CHURCH OF ATLANTIS!",                 artist: "The Church of Atlantis",       cover: "covers/radio24.jpg", src: "audio/jesus.mp3",                        duration: 34 },
         { title: "20% OFF LIMITED EDITION SHIT BOWLS at SHIT PUDDLE GARY'S SHIT FARM",                 artist: "Shit Puddle Gary's Shit Far",       cover: "covers/radio23.jpg", src: "audio/garyfarm.mp3",                        duration: 36 },
         { title: "Bells-a-Hop",                 artist: "Olivia Anne",       cover: "covers/radio22.jpg", src: "audio/Bells a hop.mp3",                        duration: 213 },
         { title: "We've Got Rupert",                        artist: "17 Months", cover: "covers/radio5.jpg",  src: "audio/We've Got Rupert.mp3",                               duration: 180 },
         { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
-        { title: "Me and Michael",               artist: "MGMT", cover: "covers/radio25.jpg",  src: "audio/michael.mp3",                      duration: 290 }
+        { title: "Me and Michael",               artist: "MGMT", cover: "covers/radio25.jpg",  src: "audio/michael.mp3",                      duration: 290 },
         { title: "Blaze and Glory",                         artist: "17 Months", cover: "covers/radio19.jpg", src: "audio/Blaze and Glory.mp3",                                duration: 166 },
         { title: "Perched",                                 artist: "The Chart of Consequences", cover: "covers/radio16.jpg", src: "audio/Perched.mp3",                        duration: 43  },
         { title: "Addicted To The 'Pedia",                  artist: "17 Months", cover: "covers/radio12.jpg", src: "audio/Addicted To The 'Pedia.mp3",                         duration: 198 },
@@ -313,8 +305,7 @@
         { title: "Money Magnet",                            artist: "Ksenia Angel", cover: "covers/radio21.jpg", src: "audio/Money Magnet.mp3",                        duration: 167  },
         { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
 
-        // BLOCK C (Mixed Order)
-        { title: "JOIN US TODAY AT THE CHURCH OF ATLANTIS!",                 artist: "The Church of Atlantis",       cover: "covers/radio24.jpg", src: "audio/jesus.mp3",                        duration: 34 },
+        // BLOCK C
         { title: "20% OFF LIMITED EDITION SHIT BOWLS at SHIT PUDDLE GARY'S SHIT FARM",                 artist: "Shit Puddle Gary's Shit Far",       cover: "covers/radio23.jpg", src: "audio/garyfarm.mp3",                        duration: 36 },
         { title: "Backshots In The Garage",                 artist: "ERM",       cover: "covers/radio18.jpg", src: "audio/Backshots In The Garage.mp3",                        duration: 209 },
         { title: "The Death of Jenkins",                    artist: "17 Months", cover: "covers/radio10.jpg", src: "audio/The Death of Jenkins.mp3",                           duration: 234 },
@@ -337,7 +328,7 @@
         { title: "It's Time To Leave",                      artist: "17 Months", cover: "covers/radio13.jpg", src: "audio/17 Months - It's Time To Leave.mp3",                 duration: 238 },
         { title: "I'm Not An Incel",                        artist: "17 Months", cover: "covers/radio14.jpg", src: "audio/17 Months - I'm Not An Incel.mp3",                   duration: 169 },
         { title: "Thanksgiving Dinner",                     artist: "17 Months", cover: "covers/radio7.jpg",  src: "audio/Thanksgiving Dinner.mp3",                            duration: 182 },
-       { title: "Me and Michael",               artist: "MGMT", cover: "covers/radio25.jpg",  src: "audio/michael.mp3",                      duration: 290 }
+        { title: "Me and Michael",               artist: "MGMT", cover: "covers/radio25.jpg",  src: "audio/michael.mp3",                      duration: 290 },
         { title: "Raven, Let's Get Married!",               artist: "17 Months", cover: "covers/radio4.jpg",  src: "audio/Raven, Let's Get Married!.mp3",                      duration: 213 }
     ];
 
@@ -364,16 +355,12 @@
     // 2. SERVER TIME SYNC FUNCTION
     async function syncToGlobalTime() {
         try {
-            // We request the current page headers from GitHub
-            // The 'Date' header contains the accurate server time
             const response = await fetch(window.location.href, { method: 'HEAD' });
             const serverDateStr = response.headers.get('Date');
             
             if (serverDateStr) {
                 const serverTime = new Date(serverDateStr).getTime();
                 const localTime = Date.now();
-                // Calculate difference: Server Time - Local Time
-                // If local time is "behind" (e.g. set to 1999), this offset will be huge positive number
                 serverTimeOffset = (serverTime - localTime) / 1000; 
                 console.log("Synced to server time. Offset (sec):", serverTimeOffset);
             }
@@ -408,8 +395,6 @@
     }
 
     function syncRadio() {
-        // 3. APPLY OFFSET TO TIME CALCULATION
-        // We add the offset to Date.now() to get the "Real" world time
         const now = Math.floor((Date.now() / 1000) + serverTimeOffset); 
         
         let currentPosition = now % totalDuration;
@@ -466,9 +451,7 @@
     }
 
     // 4. INITIALIZE SYNC
-    // First, try to get the real time
     syncToGlobalTime().then(() => {
-        // Then start the radio logic
         setInterval(syncRadio, 1000);
         
         // Initialize UI
